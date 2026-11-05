@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LPU Food Court Crowd Management System</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+:root{--bg:#0a0a0a;--cy:#22d3ee;--pu:#a855f7;--pk:#f43f5e;--tx:#e8eaf0;--mut:#8b90a0;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(60% 50% at 20% 10%,#22d3ee22,transparent),radial-gradient(50% 50% at 85% 40%,#a855f726,transparent),radial-gradient(40% 40% at 30% 90%,#a855f718,transparent),#0a0a0a}
+.grid-bg{position:fixed;inset:0;z-index:-1;opacity:.18;background-image:linear-gradient(#22d3ee22 1px,transparent 1px),linear-gradient(90deg,#22d3ee22 1px,transparent 1px);background-size:60px 60px;transform:perspective(600px) rotateX(55deg) translateY(30%) scale(2.2);mask-image:linear-gradient(transparent,#000 70%)}
+section{position:relative;padding:110px 6vw}
+.glass{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:22px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 0 0 1px #0002,0 20px 60px -20px #000}
+.glow-c{box-shadow:0 0 40px -8px #22d3ee66,inset 0 0 0 1px #22d3ee44}
+.glow-p{box-shadow:0 0 40px -8px #a855f788,inset 0 0 0 1px #a855f755}
+.grad{background:linear-gradient(90deg,var(--cy),var(--pu));-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrow{font:600 12px/1 ui-monospace,monospace;letter-spacing:.25em;text-transform:uppercase;color:var(--cy)}
+h2{font-size:clamp(30px,5vw,60px);line-height:1.05;font-weight:800;letter-spacing:-.03em;margin:14px 0 12px;max-width:900px}
+.sub{color:var(--mut);max-width:680px;font-size:clamp(15px,1.6vw,18px);line-height:1.6}
+/* hero */
+#hero{height:100vh;min-height:620px;display:flex;align-items:center;justify-content:center;perspective:1400px;overflow:hidden;padding:0 6vw}
+.stage{position:relative;width:min(1100px,100%);height:70vh;transform-style:preserve-3d}
+.hero-copy{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform:translateZ(60px);z-index:3;pointer-events:none}
+.hero-copy h1{font-size:clamp(34px,6.4vw,84px);line-height:1;font-weight:800;letter-spacing:-.04em;margin:18px 0;max-width:1000px;text-shadow:0 0 50px #22d3ee33}
+.fc{position:absolute;padding:16px 18px;font-size:13px;min-width:150px;transform-style:preserve-3d}
+.fc b{display:block;font-size:26px;margin-top:4px}
+.fc small{color:var(--mut)}
+.scrollcue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--mut);font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+.scrollcue i{width:1px;height:42px;background:linear-gradient(var(--cy),transparent);animation:dr 1.8s infinite}
+@keyframes dr{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:99px;font-size:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--cy);box-shadow:0 0 12px var(--cy);animation:pl 1.6s infinite}
+@keyframes pl{50%{opacity:.3}}
+/* cards */
+.row{display:grid;gap:22px;margin-top:48px}
+.r3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.r2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{padding:28px;transform-style:preserve-3d;will-change:transform}
+.big{font-size:clamp(44px,6vw,76px);font-weight:800;letter-spacing:-.04em;line-height:1}
+.ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#22d3ee1a;color:var(--cy);margin-bottom:18px}
+.ico svg{width:22px;height:22px}
+.bar{height:10px;border-radius:9px;background:#ffffff14;overflow:hidden;margin:8px 0 16px}
+.bar>i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,var(--cy),var(--pu));box-shadow:0 0 14px var(--cy)}
+.meta{display:flex;justify-content:space-between;font-size:14px}
+.lbl{color:var(--mut);font-size:14px;line-height:1.5}
+/* zones */
+.lvl{padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.seats{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin:18px 0}
+.seats i{aspect-ratio:1;border-radius:6px;background:#ffffff14;transition:.4s}
+input[type=range]{width:100%;accent-color:var(--cy)}
+/* sim */
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.item{padding:12px;border-radius:14px;background:#ffffff0d;border:1px solid #ffffff18;text-align:left;color:var(--tx);cursor:pointer;font:inherit;transition:.2s}
+.item:hover,.item.on{border-color:var(--cy);background:#22d3ee14;box-shadow:0 0 22px -6px var(--cy)}
+.item small{display:block;color:var(--mut)}
+.btn{padding:13px 22px;border-radius:14px;border:0;font-weight:700;cursor:pointer;color:#06121a;background:linear-gradient(90deg,var(--cy),var(--pu));box-shadow:0 0 30px -4px var(--cy);font:inherit;font-weight:700}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.tok{font:800 46px ui-monospace,monospace;letter-spacing:.05em}
+.chart{display:flex;align-items:flex-end;gap:6px;height:150px;margin-top:20px}
+.chart div{flex:1;border-radius:6px 6px 0 0;background:#ffffff24;position:relative;transition:height .5s}
+.chart div.rush{background:linear-gradient(var(--pk),#f43f5e55)}
+.chart div.best{background:linear-gradient(var(--cy),#22d3ee44);box-shadow:0 0 16px var(--cy)}
+.ticks{display:flex;gap:6px;font-size:10px;color:var(--mut);margin-top:6px}.ticks span{flex:1;text-align:center}
+/* timeline */
+.steps{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:48px;position:relative}
+.n{font:800 54px ui-monospace,monospace;color:#22d3ee33}
+footer{padding:60px 6vw 80px;text-align:center;color:var(--mut);font-size:14px}
+.rv{opacity:0;transform:translateY(50px)}
+@media(max-width:700px){.fc{display:none}.fc.keep{display:block;min-width:120px}section{padding:80px 5vw}}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<section id="hero">
+  <div class="stage" id="stage">
+    <div class="glass fc glow-c keep" style="left:2%;top:8%" data-z="120"><small>Peak window</small><b class="grad">11–2 PM</b></div>
+    <div class="glass fc glow-p keep" style="right:3%;top:14%" data-z="200"><small>No empty seats</small><b class="grad">30 / 53</b></div>
+    <div class="glass fc glow-p" style="left:6%;bottom:12%" data-z="260"><small>Wait 10+ min</small><b class="grad">45.3%</b></div>
+    <div class="glass fc glow-c keep" style="right:6%;bottom:8%" data-z="90"><small>Want pre-ordering</small><b class="grad">32 votes</b></div>
+    <div class="hero-copy">
+      <span class="glass badge"><span class="dot"></span><span class="eyebrow" style="letter-spacing:.18em">Design Thinking · LP Group-1</span></span>
+      <h1>LPU Food Court Crowd Management — <span class="grad">Redefining Campus Dining.</span></h1>
+      <p class="sub">Eliminate peak-hour chaos, long queues, and seat hunting through intelligent real-time design.</p>
+    </div>
+  </div>
+  <div class="scrollcue">Scroll to explore<i></i></div>
+</section>
+
+<section id="insights">
+  <div class="rv"><div class="eyebrow">01 · Research</div>
+  <h2>The Student Reality: <span class="grad">What Our Survey Uncovered</span></h2>
+  <p class="sub">Insights derived from 53 student responses collected between 2–5 November 2026.</p></div>
+  <div class="row r3">
+    <div class="glass card glow-c rv">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <div class="eyebrow">Peak Rush Windows</div>
+      <div class="meta" style="margin-top:18px"><span>Lunch · 11 AM–2 PM</span><b><span data-count="23">0</span> votes</b></div>
+      <div class="bar"><i data-w="43.4"></i></div>
+      <div class="meta"><span>Evening · 2–6 PM</span><b><span data-count="21">0</span> votes</b></div>
+      <div class="bar"><i data-w="39.6"></i></div>
+      <p class="lbl">The two most congested times on campus.</p>
+    </div>
+    <div class="glass card glow-p rv">
+      <div class="ico" style="background:#a855f71f;color:var(--pu)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3z"/><path d="M6 18v2M18 18v2"/></svg></div>
+      <div class="eyebrow" style="color:var(--pu)">The #1 Bottleneck</div>
+      <div class="big grad" style="margin:14px 0 6px"><span data-count="30">0</span><span style="font-size:.45em"> / 53</span></div>
+      <p class="lbl"><b style="color:var(--tx)">“No empty seats”</b> was selected by 30 out of 53 students — the top pain point.</p>
+      <div class="bar"><i data-w="56.6"></i></div>
+    </div>
+    <div class="glass card glow-c rv">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/></svg></div>
+      <div class="eyebrow">The Waiting Penalty</div>
+      <div class="big grad" style="margin:14px 0 6px"><span data-count="45.3" data-d="1">0</span>%</div>
+      <p class="lbl">24 respondents wait <b style="color:var(--tx)">10 minutes or more</b> just to place an order.</p>
+      <div class="big grad" style="margin:22px 0 6px;font-size:clamp(34px,4vw,50px)"><span data-count="86.8" data-d="1">0</span>%</div>
+      <p class="lbl">say crowding directly affects their decision to visit.</p>
+    </div>
+  </div>
+</section>
+
+<section id="live">
+  <div class="rv"><div class="eyebrow">02 · Live Tracker</div>
+  <h2>Real-Time <span class="grad">Food Court Intelligence</span></h2>
+  <p class="sub">Occupancy by zone, so students stop hunting for seats. Demo data is simulated — drag the clock to see how the day unfolds.</p></div>
+  <div class="glass card rv" style="margin-top:36px;padding:20px 26px">
+    <div class="meta"><span class="eyebrow">Simulated time</span><b id="clock" style="font-size:20px"></b></div>
+    <input type="range" id="hr" min="8" max="22" step="0.25" value="12.75" aria-label="Simulated time of day">
+  </div>
+  <div class="row r2" style="margin-top:22px">
+    <div class="glass card rv" id="z0"></div>
+    <div class="glass card rv" id="z1"></div>
+  </div>
+</section>
+
+<section id="solutions">
+  <div class="rv"><div class="eyebrow">03 · Solutions</div>
+  <h2>Engineered for Efficiency: <span class="grad">Proposed Solutions</span></h2>
+  <p class="sub">Built from the top feature requests students gave us.</p></div>
+  <div class="row r2">
+    <div class="glass card glow-c rv">
+      <div class="eyebrow">Food Pre-Ordering · Top choice</div>
+      <div class="meta" style="margin:12px 0 4px"><b class="grad" style="font-size:28px">32 votes</b><span class="lbl">79.2% interest</span></div>
+      <div class="bar"><i data-w="79.2"></i></div>
+      <p class="lbl">Try the mockup — pick items, order ahead, skip the counter line.</p>
+      <div class="menu" id="menu"></div>
+      <div class="meta"><span class="lbl" id="sum">Nothing selected</span><button class="btn" id="order" disabled>Pre-order</button></div>
+    </div>
+    <div class="glass card glow-p rv" id="tokcard">
+      <div class="eyebrow" style="color:var(--pu)">Online Queue Tokens · 29 votes</div>
+      <p class="lbl" style="margin-top:12px">Live digital tokens with estimated waiting time and an order-ready notification.</p>
+      <div style="text-align:center;margin:26px 0">
+        <div class="lbl" id="tokl">Your token</div>
+        <div class="tok grad" id="tok">— — —</div>
+        <div class="lbl" id="eta">Place a pre-order to get one</div>
+      </div>
+      <div class="bar"><i id="tokbar" style="width:0"></i></div>
+      <div class="lbl" id="note"></div>
+    </div>
+  </div>
+  <div class="glass card rv" style="margin-top:22px">
+    <div class="eyebrow">Best Time to Visit</div>
+    <p class="lbl" style="margin:10px 0 0;max-width:640px">Smart suggestions steer students around the 11 AM–2 PM rush. <b style="color:var(--tx)" id="besttxt"></b></p>
+    <div class="chart" id="chart"></div><div class="ticks" id="ticks"></div>
+    <p class="lbl" style="margin-top:12px"><span style="color:var(--pk)">■</span> Rush &nbsp; <span style="color:var(--cy)">■</span> Recommended (simulated curve)</p>
+  </div>
+</section>
+
+<section id="next">
+  <div class="rv"><div class="eyebrow">04 · Roadmap</div>
+  <h2>Next Phase in Our <span class="grad">Design Thinking Journey</span></h2>
+  <p class="sub">Turning a digital concept into campus reality.</p></div>
+  <div class="steps">
+    <div class="glass card rv"><div class="n">01</div><h3 style="margin:8px 0">Field Observations</h3><p class="lbl">Watch real peak-hour flow at both food courts — queue lengths, seating gaps, counter timings.</p></div>
+    <div class="glass card glow-c rv"><div class="n">02</div><h3 style="margin:8px 0">Vendor Interviews</h3><p class="lbl">Understand kitchen capacity, order handling, and what it takes to support pre-orders and tokens.</p></div>
+    <div class="glass card glow-p rv"><div class="n">03</div><h3 style="margin:8px 0">Prototype Testing</h3><p class="lbl">Put the pre-order and token flow in front of students, measure wait times, and iterate.</p></div>
+  </div>
+</section>
+
+<footer>
+  <div class="grad" style="font-weight:800;font-size:20px">LPU Food Court Crowd Management System</div>
+  <p>Ishika · Bhavya · Navdeep · Shikhar &nbsp;|&nbsp; Section LP Group-1</p>
+</footer>
+
+<script>
+(function(){
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var G=window.gsap;
+if(G&&window.ScrollTrigger)G.registerPlugin(ScrollTrigger);
+// smooth scroll
+if(window.Lenis&&!reduce){var L=new Lenis({lerp:.09});
+  if(G){L.on('scroll',ScrollTrigger.update);G.ticker.add(function(t){L.raf(t*1000)});G.ticker.lagSmoothing(0);}
+  else{(function f(t){L.raf(t);requestAnimationFrame(f)})(0);}}
+// counters + bars
+function count(el){var to=parseFloat(el.dataset.count),d=+el.dataset.d||0,o={v:0};
+  if(!G){el.textContent=to.toFixed(d);return}
+  G.to(o,{v:to,duration:1.6,ease:'power2.out',onUpdate:function(){el.textContent=o.v.toFixed(d)}});}
+function bars(root){root.querySelectorAll('[data-w]').forEach(function(b){b.style.transition='width 1.4s cubic-bezier(.2,.8,.2,1)';b.style.width=b.dataset.w+'%'})}
+if(G&&window.ScrollTrigger&&!reduce){
+  // hero 3D
+  var st=document.getElementById('stage');
+  G.set('.fc',{z:function(i,el){return +el.dataset.z}});
+  G.to('.fc',{y:function(i){return -80-i*50},rotationY:function(i){return i%2?-35:35},rotationX:12,opacity:0,
+    scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:true}});
+  G.to(st,{rotationX:18,z:-300,opacity:.0,scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom 20%',scrub:true}});
+  G.from('.fc',{opacity:0,scale:.6,y:60,rotationY:-40,duration:1.4,stagger:.15,ease:'power3.out',delay:.2});
+  G.from('.hero-copy>*',{opacity:0,y:40,duration:1.2,stagger:.15,ease:'power3.out'});
+  var hero=document.getElementById('hero');
+  hero.addEventListener('mousemove',function(e){var x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;
+    G.to('.fc',{x:function(i){return x*(20+i*14)},duration:1})});
+  // reveal
+  document.querySelectorAll('.rv').forEach(function(el){
+    ScrollTrigger.create({trigger:el,start:'top 88%',once:true,onEnter:function(){
+      G.to(el,{opacity:1,y:0,duration:1,ease:'power3.out'});
+      el.querySelectorAll('[data-count]').forEach(count);bars(el);}});
+    // 3D tilt on scroll
+    if(el.classList.contains('card'))G.fromTo(el,{rotationX:14,transformPerspective:900},{rotationX:0,ease:'none',scrollTrigger:{trigger:el,start:'top bottom',end:'top 55%',scrub:true}});
+  });
+}else{
+  document.querySelectorAll('.rv').forEach(function(el){el.style.opacity=1;el.style.transform='none';
+    el.querySelectorAll('[data-count]').forEach(count);bars(el)});
+}
+// occupancy model (simulated)
+function occ(h,z){var a=z?[13.2,19,1.5,1.7,.6]:[12.4,16,1.3,1.9,.8];
+  var v=14+78*Math.exp(-Math.pow((h-a[0])/a[2],2))+62*a[4]*Math.exp(-Math.pow((h-a[1])/a[3],2));
+  return Math.max(6,Math.min(99,v));}
+function lvl(p){return p<40?['Low','#22d3ee','#22d3ee1f']:p<70?['Moderate','#a855f7','#a855f726']:['Peak Rush','#f43f5e','#f43f5e26']}
+var Z=[{n:'Food Court near Academic Blocks',s:'Most frequently visited location'},{n:'Food Court near Hostels & Uni Mall / Market Area',s:'Evening hangout & market-side crowd'}];
+var jit=[0,0],hr=document.getElementById('hr');
+function fmt(h){var H=Math.floor(h),m=Math.round((h-H)*60),ap=H>=12?'PM':'AM';return ((H+11)%12+1)+':'+(m<10?'0':'')+m+' '+ap}
+function draw(){var h=+hr.value;document.getElementById('clock').textContent=fmt(h);
+  Z.forEach(function(z,i){var p=Math.max(4,Math.min(99,occ(h,i)+jit[i])),l=lvl(p),on=Math.round(p/10),seats='';
+    for(var k=0;k<20;k++)seats+='<i style="'+(k<Math.round(p/5)?'background:'+l[1]+';box-shadow:0 0 10px '+l[1]+'88':'')+'"></i>';
+    document.getElementById('z'+i).innerHTML='<div class="meta" style="align-items:flex-start;gap:12px"><div><h3 style="margin:0 0 4px;font-size:20px">'+z.n+'</h3><div class="lbl">'+z.s+'</div></div><span class="lvl" style="color:'+l[1]+';background:'+l[2]+';border:1px solid '+l[1]+'66;white-space:nowrap">'+l[0]+'</span></div>'+
+    '<div class="seats" style="grid-template-columns:repeat(10,1fr)">'+seats+'</div><div class="meta"><span class="lbl">Seats occupied</span><b style="color:'+l[1]+';font-size:24px">'+Math.round(p)+'%</b></div>'});}
+hr.addEventListener('input',draw);draw();
+setInterval(function(){jit=[Math.random()*6-3,Math.random()*6-3];draw()},3000);
+// best time chart
+var ch=document.getElementById('chart'),tk=document.getElementById('ticks'),hs=[];for(var h=9;h<=21;h++)hs.push(h);
+ch.innerHTML=hs.map(function(h){var p=occ(h,0),c=h>=11&&h<14?'rush':(h<11||h>=15&&p<45)&&p<45?'best':'';return '<div class="'+c+'" style="height:'+p*1.5+'px" title="'+fmt(h)+'"></div>'}).join('');
+tk.innerHTML=hs.map(function(h){return '<span>'+((h+11)%12+1)+'</span>'}).join('');
+document.getElementById('besttxt').textContent='Suggested: arrive before 11 AM or after 2 PM for the shortest waits.';
+// pre-order simulator
+var M=[['Veg Thali',120],['Paneer Roll',80],['Cold Coffee',70],['Maggi',60],['Burger',90],['Fries',50]],sel={};
+var menu=document.getElementById('menu'),sum=document.getElementById('sum'),ob=document.getElementById('order');
+menu.innerHTML=M.map(function(m,i){return '<button class="item" data-i="'+i+'">'+m[0]+'<small>₹'+m[1]+'</small></button>'}).join('');
+menu.addEventListener('click',function(e){var b=e.target.closest('.item');if(!b)return;var i=b.dataset.i;sel[i]?delete sel[i]:sel[i]=1;b.classList.toggle('on');
+  var n=Object.keys(sel).length,t=Object.keys(sel).reduce(function(a,k){return a+M[k][1]},0);
+  sum.textContent=n?n+' item'+(n>1?'s':'')+' · ₹'+t:'Nothing selected';ob.disabled=!n});
+var timer;
+ob.addEventListener('click',function(){clearInterval(timer);var n=Object.keys(sel).length,tot=n*60+90,left=tot,num='A-'+(10+Math.floor(Math.random()*80));
+  document.getElementById('tok').textContent=num;document.getElementById('tokl').textContent='Your live token';
+  var eta=document.getElementById('eta'),bar=document.getElementById('tokbar'),note=document.getElementById('note');note.textContent='Pre-order confirmed — head to the pickup counter when notified.';
+  timer=setInterval(function(){left-=Math.max(1,tot/40);var pct=Math.min(100,(1-left/tot)*100);bar.style.width=pct+'%';
+    if(left<=0){clearInterval(timer);eta.textContent='Ready!';note.textContent='🔔 Your order is ready — skip the line and collect at the pickup counter.';bar.style.width='100%'}
+    else{var m=Math.floor(left/60),s=Math.round(left%60);eta.textContent='Estimated wait · '+m+'m '+(s<10?'0':'')+s+'s'}},250);});
+})();
+</script>
+</body>
+</html>
